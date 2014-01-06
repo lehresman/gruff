@@ -4,7 +4,7 @@ require File.dirname(__FILE__) + '/bar_conversion'
 class Gruff::Bar < Gruff::Base
 
   # Spacing factor applied between bars
-  attr_accessor :bar_spacing
+  attr_accessor :bar_spacing, :series_spacing
 
   def initialize(*args)
     super
@@ -41,8 +41,10 @@ protected
     #
     # Columns sit side-by-side.
     @bar_spacing ||= @spacing_factor # space between the bars
+    @series_spacing ||= @spacing_factor
     @bar_width = @graph_width / (@column_count * @data.length).to_f
-    padding = (@bar_width * (1 - @bar_spacing)) / 2
+    inner_padding = (@bar_width * (1 - @bar_spacing)) / 2
+    outer_padding = (@bar_width * (1 - @series_spacing)) / 2
 
     @d = @d.stroke_opacity 0.0
 
@@ -74,7 +76,8 @@ protected
       data_row[DATA_VALUES_INDEX].each_with_index do |data_point, point_index|
         # Use incremented x and scaled y
         # x
-        left_x = @graph_left + (@bar_width * (row_index + point_index + ((@data.length - 1) * point_index))) + padding
+        left_x = @graph_left + (@bar_width * (row_index + point_index + ((@data.length - 1) * point_index))) + inner_padding
+        left_x += outer_padding if row_index > 0 && point_index == 0
         right_x = left_x + @bar_width * @bar_spacing
         # y
         conv = []
